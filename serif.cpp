@@ -224,8 +224,8 @@ void serif_rx_send_rfm_from_node(void)
 
 void serif_radiate_node_json(char *buff)
 {
-	memcpy(uart.rx.msg,buff,MAX_MESSAGE_LEN);
-	serif_rx_send_rfm_from_node();
+	//memcpy(uart.rx.msg,buff,MAX_MESSAGE_LEN);
+	//serif_rx_send_rfm_from_node();
 }
 
 
