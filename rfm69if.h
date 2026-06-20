@@ -9,7 +9,7 @@
 #define NETWORKID         100  //the same on all nodes that talk to each other
 #define NODEID            10  
 #define BROADCAST         255
-#define MAX_MESSAGE_LEN   61
+
 #define RECEIVER          BROADCAST    // The recipient of packets
 //Match frequency to the hardware version of the radio on your Feather
 //#define FREQUENCY       RF69_433MHZ
@@ -25,12 +25,7 @@ typedef void (*led_on_function)(uint32_t duration_ms);
 
 void rfm69_initialize(RH_RF69 *rf69_p, uint8_t pin_rst, uint8_t key[]);
 
-void rfm69_set_led_cb(led_on_function led_on_cb);
 
-typedef struct
-{
-    bool            transparent;
-} rfm69_st;
 
 typedef struct
 {
@@ -64,13 +59,6 @@ void rfm69_receive_task(void);
 void rfm69_get_message(char *buff, uint8_t max_len, bool clr_avail);
 
 void rfm69_clr_receive_message_flag(void);
-
-void rfm69_set_print_debug_cb(PrintCallback cb);
-
-void rfm69_print_debug(char *msg);
-
-
-void rfm69_set_transparent(bool is_transparent);
 
 int16_t rfm69_get_last_rssi(void);
 

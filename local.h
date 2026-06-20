@@ -3,18 +3,12 @@
 
 
 #undef      MODEM_DEBUG_PRINT
-//#define     MODEM_DEBUG_PRINT
+#define 	MAX_MESSAGE_LEN   	61
+#define		MAX_PRINT_LEN		80
 
 //typedef void (*led_on_callback(uint32_t duration_ms));
 
 typedef void (*PrintCallback)(const char* msg);
-
-typedef enum
-{
-    MSG_FORMAT_RAW = 0,
-    MSG_FORMAT_SENSOR_JSON,
-    MSG_FORMAT_RELAY_JSON
-}  msg_format_et;
 
 typedef enum
 {

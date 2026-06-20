@@ -5,36 +5,34 @@
 
 #include "local.h"
 #include "rfm69if.h"
+#include "serif.h"
 
 RH_RF69 *rf69p;
 
 rfm_receive_msg_st  receive_msg = {0};
-rfm_send_msg_st     send_msg;
-rfm69_st rfm69 ={ .transparent = false};
 
-static PrintCallback print_debug_cb = nullptr;
+extern char  prbuff[];
 
 void rfm69_initialize(RH_RF69 *rf69_p, uint8_t pin_rst, uint8_t key[])
 {
     rf69p = rf69_p;
     pinMode(pin_rst, OUTPUT);
-    digitalWrite(pin_rst, LOW);    	delay(100);
-    digitalWrite(pin_rst, HIGH);    delay(100);
+    digitalWrite(pin_rst, HIGH);    	delay(100);
+    digitalWrite(pin_rst, LOW);    delay(100);
 
+	serif_debug_print("RFM69 Initialize:\n");
     if (!rf69p->init()) {
-		Serial.println(F("RFM69 radio init failed"));
+		serif_debug_print("RFM69 radio init failed\n");
 		while (1){ 
-			Serial.println("@rfm#");
-			delay(10000);
+			serif_debug_print("@rfm#");
+			delay(5000);
 		};
     }
-    #ifdef MODEM_DEBUG_PRINT
-    Serial.println(F("RFM69 radio init OK!"));
-    #endif
+    serif_debug_print("RFM69 radio init OK!");
     // Defaults after init are 434.0MHz, modulation GFSK_Rb250Fd250, +13dbM (for low power module)
     // No encryption
     if (!rf69p->setFrequency(RF69_FREQ)) {
-        Serial.println(F("RF69 setFrequency failed!!"));
+        serif_debug_print("RF69 setFrequency failed!!\n");
     }
     // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
     // ishighpowermodule flag set like this:
@@ -43,38 +41,15 @@ void rfm69_initialize(RH_RF69 *rf69_p, uint8_t pin_rst, uint8_t key[])
     //uint8_t key[] = RFM69_KEY; //exactly the same 16 characters/bytes on all nodes!   
     rf69p->setEncryptionKey(key);
   
-    #ifdef MODEM_DEBUG_PRINT
-    Serial.print(F("RFM69 radio @"));  Serial.print((int)RF69_FREQ);  Serial.println(F(" MHz"));
-    #endif   
+	sprintf(prbuff,"RFM69 radio @ %d MHz\n",(int)RF69_FREQ);
+    // serif_debug_print(("RFM69 radio @");  Serial.print((int)RF69_FREQ);  Serial.println(F(" MHz"));   
 
     // Initialize Receive 
     receive_msg.avail = false;
 
 }
 
-void rfm69_set_print_debug_cb(PrintCallback cb)
-{
-	print_debug_cb = cb;
-}
 
-void rfm69_print_debug(char *msg)
-{	
-	if(print_debug_cb) print_debug_cb(msg);
-}
-void rfm69_set_transparent(bool is_transparent)
-{
-    rfm69.transparent = is_transparent;
-}
-
-rfm_receive_msg_st *rfm69_get_receive_data_ptr(void)
-{
-    return &receive_msg;
-}
-
-rfm_send_msg_st *rfm69_get_send_data_ptr(void)
-{
-    return &send_msg;
-}
 int16_t rfm69_get_last_rssi(void)
 {
     return (receive_msg.rssi);
@@ -84,7 +59,6 @@ int16_t rfm69_get_last_rssi(void)
 
 void rfm69_receive_message(void)
 {
-    //rfm_receive_msg_st *tx_msg = &receive_msg;
     if (rf69p->available()) 
     {
         receive_msg.len = sizeof(receive_msg.radio_msg);
@@ -95,17 +69,19 @@ void rfm69_receive_message(void)
             {   
                 if (receive_msg.len >= MAX_MESSAGE_LEN) receive_msg.len = MAX_MESSAGE_LEN -1;
                 receive_msg.radio_msg[receive_msg.len] = 0;
-                if (rfm69.transparent) Serial.println((char*)receive_msg.radio_msg);  
-                #ifdef MODEM_DEBUG_PRINT
-                Serial.print(F("Received [)"));Serial.print(receive_msg.len);Serial.print("]: ");
-                Serial.println((char*)receive_msg.radio_msg);               
-                Serial.print(F("len: "));
-                Serial.print(receive_msg.len, DEC);
-                Serial.print(F("  RSSI: "));
-                Serial.println(rf69p->lastRssi(), DEC);
-                #endif
+				sprintf(prbuff,"Received [%d] %s len=%d RSSI= %d\n",
+					receive_msg.len,
+					(char*)receive_msg.radio_msg,
+					receive_msg.len,
+					rf69p->lastRssi()
+				);
+                //Serial.print(F("Received [)"));Serial.print(receive_msg.len);Serial.print("]: ");
+                //Serial.println((char*)receive_msg.radio_msg);               
+                //Serial.print(F("len: "));
+                //Serial.print(receive_msg.len, DEC);
+                //Serial.print(F("  RSSI: "));
+                //Serial.println(rf69p->lastRssi(), DEC);
                 receive_msg.rssi = rf69p->lastRssi();
-
             }
         }
     }
@@ -160,9 +136,8 @@ void rfm69_radiate_msg( char *radio_msg )
     //Serial.print("rfm69_radiate_msg: "); Serial.println(radio_msg); 
     if (radio_msg[0] != 0)
     {
-        #ifdef MODEM_DEBUG_PRINT
-        Serial.println(radio_msg);
-        #endif
+		sprintf(prbuff,"Radiate: %s\n", radio_msg);
+        //Serial.println(radio_msg);
         //rf69p->waitPacketSent();
         rf69p->send((uint8_t *)radio_msg, strlen(radio_msg));      
     }

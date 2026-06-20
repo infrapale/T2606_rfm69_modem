@@ -1,23 +1,17 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
+#include <Arduino.h>
 #include "WString.h"
 #define   __APP__ ((char*)"T2606_Modem69_Test")
 
 #define DEBUG_PRINT 
-//#define SEND_TEST_MSG 
-//#define ADA_M0_RFM69 
-//#define ADA_PICO_FEATHER
-//#define PRO_MINI_RFM69
-#include <Arduino.h>
-//#include "rfm69.h"
 
-#ifdef  ADA_M0_RFM69
-#define SerialX  Serial1
-#else
-#define SerialX Serial
-#endif
+typedef struct
+{
+    uint32_t next_io_tick;
+    uint32_t next_comm_tick;
+} main_ctrl_st;
 
-#define TASK_NBR_OF  3
 #define LED_INDICATION
 
 #define MY_MODULE_TAG   'R'
