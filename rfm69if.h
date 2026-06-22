@@ -54,6 +54,14 @@ void rfm69_receive_message(void);
 /// @return
 bool rfm69_receive_message_is_avail(void);
 
+uint8_t rfm69if_send_queue_avail(void);
+
+uint8_t rfm69if_enqueue_msg(const char *text);
+
+static const char* rfm69if_dequeue_msg(void);
+
+void rfm69if_send_task(void);
+
 void rfm69_receive_task(void);
 
 void rfm69_get_message(char *buff, uint8_t max_len, bool clr_avail);
@@ -76,7 +84,7 @@ rfm_send_msg_st *rfm69_get_send_data_ptr(void);
 /// @brief  Send message
 /// @param  message to send
 /// @return
-void rfm69_radiate_msg( char *radio_msg );
+void rfm69_radiate_msg( const char *radio_msg );
 
 
 

@@ -18,8 +18,8 @@ void serif_debug_print(const char* msg)
         debug_print_cb(msg);
 	else
 	{
-		Serial.print("No debug_print defined: ");
-		Serial.print(msg);
+		//Serial.print("No debug_print defined: ");
+		//Serial.println(msg);
 	}
 }	
 

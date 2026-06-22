@@ -28,7 +28,11 @@ class Modem69
 		void set_debug_print(PrintCallback cb);
 
         void modem_task(void);
-
+		
+		uint8_t send_queue_avail(void);
+		
+		uint8_t add_to_send_queue(const char *buff);
+		
         void radiate(char *buff);
 				
 		bool msg_is_avail(void);

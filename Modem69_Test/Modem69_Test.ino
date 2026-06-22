@@ -61,7 +61,7 @@ void send_test_data_task(void);
 void rfm_receive_task(void); 
 void modem_task(void);
 void debug_cb_print(const char *msg);
-
+void rfm69_send_test(void);
 
 
 atask_st debug_print_handle        = {"Debug Print    ", 5000,0, 0, 255, 0, 1, debug_print_task};
@@ -101,6 +101,7 @@ void setup()
     rfm69_modem.set_debug_print(debug_cb_print);
     rfm69_modem.initialize(key);
     rfm69_modem.radiate(__APP__);
+    rfm69_modem.set_debug_print(nullptr);
 }
 
 void setup1(){
@@ -123,6 +124,7 @@ void loop()
         io_led_flash(LED_INDX_BLUE, BLINK_FAST, 40);
         rfm69_modem.radiate((char*)"OK");
     }
+    //rfm69_send_test();
 }
 
 void loop1()
@@ -136,6 +138,27 @@ void loop1()
     //     comm_task();
     // }
 
+}
+
+void rfm69_send_test(void)
+{
+    static uint16_t msg_nbr = 0;
+    static uint32_t next_send = millis();
+    uint8_t msg_avail;
+    char    buff[40];
+
+    if (millis() > next_send) {
+        msg_avail = rfm69_modem.send_queue_avail();
+        sprintf(buff,"Msg#: %d  Available: %d", msg_nbr, msg_avail );
+        Serial.println(buff);
+        if (msg_avail > 0){
+            rfm69_modem.add_to_send_queue(buff);
+            Serial.println("radiated");
+        }
+        msg_nbr++;
+        next_send = millis() + 500;
+
+    }
 }
 
 

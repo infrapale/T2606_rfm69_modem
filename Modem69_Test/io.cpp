@@ -52,13 +52,13 @@ const uint32_t led_pattern[BLINK_NBR_OF] =
     [BLINK_JITTER_3]  = 0b10001000100010001000100010001000,
 };
 
-#define PIN_RM69_MISO   16
-#define PIN_RFM69_CS    17
-#define PIN_RM69_SCK    18
-#define PIN_RM69_MOSI   19
-#define PIN_RFM69_RST   20
-#define PIN_RFM69_INT   21
-#define RFM69_IRQN      0  // Pin 2 is IRQ 0!
+// #define PIN_RM69_MISO   16
+// #define PIN_RFM69_CS    17
+// #define PIN_RM69_SCK    18
+// #define PIN_RM69_MOSI   19
+// #define PIN_RFM69_RST   20
+// #define PIN_RFM69_INT   21
+// #define RFM69_IRQN      0  // Pin 2 is IRQ 0!
 
 
 void io_rfm69_spi0_initialize(void) 

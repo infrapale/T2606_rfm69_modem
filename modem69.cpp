@@ -40,11 +40,19 @@ void Modem69::set_debug_print(PrintCallback cb)
 }
 		
 void Modem69::modem_task(void){
+	rfm69if_send_task();
 	rfm69_receive_task();
     // rfm69_receive_message();
 }
 
+uint8_t Modem69::send_queue_avail(void) {
+	return rfm69if_send_queue_avail();
+}
 
+uint8_t Modem69::add_to_send_queue(const char *buff)
+{
+	return rfm69if_enqueue_msg(buff);
+}
 void Modem69::radiate(char *buff)
 {	
 	serif_debug_print("Modem69::radiate: ");

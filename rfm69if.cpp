@@ -9,7 +9,21 @@
 
 RH_RF69 *rf69p;
 
+#define SEND_BUF_SIZE 8
+#define MSG_MAX_LEN   60
+
+typedef struct {
+    char msg[SEND_BUF_SIZE][MSG_MAX_LEN];
+    uint8_t head;     // next message to send
+    uint8_t tail;     // next free slot
+    uint8_t count;    // how many messages are queued
+} send_buffer_t;
+
+static send_buffer_t send_buf = {0};
+
 rfm_receive_msg_st  receive_msg = {0};
+
+
 
 extern char  prbuff[];
 
@@ -47,6 +61,72 @@ void rfm69_initialize(RH_RF69 *rf69_p, uint8_t pin_rst, uint8_t key[])
     // Initialize Receive 
     receive_msg.avail = false;
 
+}
+
+uint8_t rfm69if_send_queue_avail(void)
+{
+	return (SEND_BUF_SIZE - send_buf.count);
+}
+
+uint8_t rfm69if_enqueue_msg(const char *text)
+{
+    if (send_buf.count >= SEND_BUF_SIZE)
+        return 0; // full
+
+    strncpy(send_buf.msg[send_buf.tail], text, MSG_MAX_LEN - 1);
+    send_buf.msg[send_buf.tail][MSG_MAX_LEN - 1] = '\0';
+
+    send_buf.tail = (send_buf.tail + 1) % SEND_BUF_SIZE;
+    send_buf.count++;
+
+    return 1;
+}
+
+static const char* rfm69if_dequeue_msg(void)
+{
+    if (send_buf.count == 0)
+        return NULL;
+
+    const char *m = send_buf.msg[send_buf.head];
+    send_buf.head = (send_buf.head + 1) % SEND_BUF_SIZE;
+    send_buf.count--;
+
+    return m;
+}
+
+void rfm69if_send_task(void)
+{
+    static uint32_t wait_until = 0;
+	static uint8_t	state= 0;
+
+
+	switch(state)
+	{
+		case 0:
+			state = 10;
+			break;
+		case 10:
+			if (send_buf.count > 0)
+			{
+				const char *msg = rfm69if_dequeue_msg();
+				if (msg) 
+				{
+					rfm69_radiate_msg( msg );
+					wait_until = millis() + 1500;
+					state = 20;
+				}
+			}
+			break;
+		case 20:
+			if(millis() > wait_until)state = 10;
+			break;
+		case 30:
+			state = 10;
+			break;
+		case 40:
+			state = 10;
+			break;
+	}
 }
 
 
@@ -131,7 +211,7 @@ void rfm69_receive_task(void)
 }
 
 //*****************   Send   *****************************************
-void rfm69_radiate_msg( char *radio_msg )
+void rfm69_radiate_msg( const char *radio_msg )
 {
     //Serial.print("rfm69_radiate_msg: "); Serial.println(radio_msg); 
     if (radio_msg[0] != 0)
